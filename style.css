@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    color: white;
+    font-family: sans-serif;
+}
+
+
+
+
+body {
+    background: linear-gradient(to right, #0c0c0c, #0d6e61);
+    /* من الأزرق الداكن إلى الرمادي الداكن */
+    font-family: "Roboto", sans-serif;
+}
+
+.container {
+    background-color: rgba(0, 195, 255, 0.144);
+    width: 80%;
+    box-shadow: 0 4px 10px rgb(0, 0, 0);
+    height: 300px;
+    border-radius: 20px;
+    margin: auto;
+    margin-top: 50px;
+    height: max-content;
+}
+
+.fa-circle {
+    font-size: 25px;
+}
+
+
+.todo_list {
+    position: relative;
+    top: 30PX;
+    width: 90%;
+    margin: auto;
+}
+
+.title h1 {
+    font-size: 50px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.row {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 20px;
+}
+
+#inp {
+    width: 70%;
+    padding: 7px;
+    border-radius: 2px;
+    background-color: transparent;
+    /* خلفية شفافة */
+    border: none;
+    /* إزالة كل البوردر */
+    border-bottom: 2px solid #ecf0f1;
+    font-size: 20px;
+}
+
+#inp:focus {
+    outline: none;
+}
+
+
+
+.btn {
+    display: inline-block;
+    padding: 10px 10px;
+    background-color: transparent;
+    border: 2px solid #ecf0f1;
+    /* بوردر بسيط */
+    border-radius: 10px;
+    /* الحواف مستديرة */
+    color: #ecf0f1;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin-left: 20px;
+    cursor: pointer;
+    width: 100px;
+
+}
+
+.task-items {
+
+    font-size: 30px;
+    margin-top: 30px;
+    padding: 10px 30px;
+    width: 100%;
+    margin-left: 10px;
+
+
+}
+
+
+li {
+    width: 95%;
+    display: flex;
+    align-items: center;
+
+    position: relative;
+    list-style: none;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    cursor: pointer;
+
+
+
+}
+
+
+.line {
+    text-decoration: line-through;
+
+
+}
+
+
+
+
+
+
+.line {
+    text-decoration: line-through;
+    color: rgb(255, 255, 255);
+    font-style: italic;
+
+
+}
+
+
+
+span {
+    position: absolute;
+    right: 0px;
+    cursor: pointer;
+    color: black;
+
+}
+
+.none {
+    display: none;
+}
+
+
+/* شاشات صغيرة (الهواتف المحمولة) */
+@media (max-width: 600px) {
+
+
+    .container {
+        width: 80%;
+        padding: 10px;
+
+
+    }
+
+    .title h1 {
+        font-size: 40px;
+    }
+
+    .fa-pen {
+        font-size: 35px;
+    }
+
+    .btn {
+        width: 50px;
+        padding: 5px;
+    }
+}
+
+
+@media (min-width: 601px) and (max-width: 1024px) {
+
+
+    .container {
+        width: 80%;
+        padding: 20px;
+    }
+}
+
+/* شاشات كبيرة (أجهزة الكمبيوتر المكتبية) */
+@media (min-width: 1025px) {
+
+
+    .container {
+        width: 60%;
+        padding: 30px;
+    }
+}
