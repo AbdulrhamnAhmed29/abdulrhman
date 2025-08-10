@@ -1,49 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To Do List</title>
-    <!-- style -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To Do List - LocalStorage + Stopwatch</title>
 
-    <link rel="stylesheet" href="style.css">
-
-
-    <!-- favacon -->
+    <link rel="stylesheet" href="style.css" />
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3176/3176366.png">
-
-    <!-- icon_font_awsome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
 </head>
 
 <body>
-
     <main class="bg">
         <div class="container">
             <div class="todo_list">
-
                 <div class="title">
-                    <h1><i class="fas fa-pen"></i> To Do List </h1>
-
-
+                    <h1><i class="fas fa-pen"></i> To Do List</h1>
                 </div>
-                <div class="row">
-                    <input type="text" name="" id="inp" placeholder="Add Task">
-                    <button class="btn" id="btn1">ADD</button>
-                </div>
-                <ul class="task-items" id="ul">
 
-                </ul>
+                <div class="controls">
+                    <input type="text" id="inp" placeholder="  Write a Task..." />
+                    <div class="btn-parent">
+                        <button class="btn" id="btnAdd">Add</button>
+                        <button class="btn btn-clear" id="btnClear"> Delete All</button>
+                    </div>
+                </div>
+
+                <ul class="task-items" id="ul"> </ul>
             </div>
         </div>
     </main>
 
-
-
-
-    <!-- script -->
     <script src="TODO.js"></script>
 </body>
 
