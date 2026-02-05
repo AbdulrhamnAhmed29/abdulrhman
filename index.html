@@ -1,38 +1,316 @@
 <!DOCTYPE html>
-<html lang="ar">
-
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>To Do List - LocalStorage + Stopwatch</title>
-
-    <link rel="stylesheet" href="style.css" />
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3176/3176366.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student OS Pro | النسخة الدقيقة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Amiri:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; overflow-x: hidden; }
+        .quran-font { font-family: 'Amiri', serif; }
+        .nav-link.active { background-color: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); }
+        .task-done { text-decoration: line-through; opacity: 0.5; color: #94a3b8; }
+        .focus-mode { background: black !important; cursor: none; }
+        .page-content { transition: all 0.4s ease; }
+    </style>
 </head>
+<body class="transition-all duration-700">
 
-<body>
-    <main class="bg">
-        <div class="container">
-            <div class="todo_list">
-                <div class="title">
-                    <h1><i class="fas fa-pen"></i> To Do List</h1>
+    <aside class="fixed right-0 top-0 h-full w-20 md:w-64 bg-white border-l border-slate-200 z-50 flex flex-col p-4 shadow-2xl">
+        <div class="mb-10 text-center">
+            <h1 class="hidden md:block text-2xl font-black text-blue-600 tracking-tighter">STUDENT OS</h1>
+            <span class="md:hidden text-2xl">🎓</span>
+        </div>
+        
+        <nav class="space-y-4 flex-1">
+            <button onclick="showPage('home')" id="nav-home" class="nav-link active w-full flex items-center gap-3 p-4 rounded-2xl transition font-bold">
+                <span>🏠</span> <span class="hidden md:block">لوحة التحكم</span>
+            </button>
+            <button onclick="showPage('days')" id="nav-days" class="nav-link w-full flex items-center gap-3 p-4 rounded-2xl transition font-bold">
+                <span>⚔️</span> <span class="hidden md:block">خطة الـ 135 يوم</span>
+            </button>
+            <button onclick="showPage('analytics')" id="nav-analytics" class="nav-link w-full flex items-center gap-3 p-4 rounded-2xl transition font-bold">
+                <span>📈</span> <span class="hidden md:block">تقارير الإنجاز</span>
+            </button>
+        </nav>
+
+        <div class="mt-auto md:p-4 bg-red-50 rounded-2xl text-center hidden md:block border border-red-100">
+            <p class="text-[10px] text-red-400 font-bold uppercase tracking-widest">باقي على الحلم</p>
+            <p id="countdown-side" class="text-xl font-black text-red-600">-- يوم</p>
+        </div>
+    </aside>
+
+    <main id="main-content" class="mr-20 md:mr-64 p-4 md:p-10 min-h-screen">
+
+        <div id="page-home" class="page-content">
+            <header class="mb-10 flex justify-between items-center">
+                <div>
+                    <h2 class="text-3xl font-black text-slate-800 italic">عاش يا بطل! 🔥</h2>
+                    <p class="text-slate-500 font-medium" id="current-date-label"></p>
                 </div>
+                <button onclick="toggleFocusMode()" class="bg-slate-900 text-white px-8 py-3 rounded-2xl font-bold shadow-lg">Focus Mode 🧠</button>
+            </header>
 
-                <div class="controls">
-                    <input type="text" id="inp" placeholder="  Write a Task..." />
-                    <div class="btn-parent">
-                        <button class="btn" id="btnAdd">Add</button>
-                        <button class="btn btn-clear" id="btnClear"> Delete All</button>
+            <div class="bg-white p-12 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                <span class="text-blue-500 font-bold mb-4 tracking-widest text-xs uppercase bg-blue-50 px-4 py-1 rounded-full">جلسة تركيز عميق</span>
+                <div id="display" class="text-8xl md:text-9xl font-black text-slate-900 mb-12 tracking-tighter">00:00:00</div>
+                <div class="flex gap-4 relative z-10">
+                    <button id="startBtn" onclick="startTimer()" class="bg-blue-600 text-white px-12 py-4 rounded-2xl font-bold hover:bg-blue-700 shadow-2xl shadow-blue-200 transition">ابدأ الآن</button>
+                    <button id="stopBtn" onclick="stopTimer()" class="hidden bg-amber-500 text-white px-12 py-4 rounded-2xl font-bold">وقف مؤقت</button>
+                    <button onclick="finishSession()" class="bg-slate-100 text-slate-600 px-10 py-4 rounded-2xl font-bold hover:bg-green-600 hover:text-white transition">تم الإنجاز ✅</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-days" class="hidden page-content">
+            <header class="flex justify-between items-center mb-10">
+                <h2 class="text-3xl font-black text-slate-800">خارطة الـ 135 يوم ⚔️</h2>
+                <div class="flex items-center gap-4 bg-white p-3 rounded-3xl shadow-sm border border-slate-100">
+                    <button onclick="changeDay(-1)" class="p-3 hover:bg-slate-50 rounded-2xl">◀️</button>
+                    <span id="current-viewing-day-label" class="font-black text-blue-600 text-xl min-w-[80px] text-center">اليوم 1</span>
+                    <button onclick="changeDay(1)" class="p-3 hover:bg-slate-50 rounded-2xl">▶️</button>
+                </div>
+            </header>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-center mb-8">
+                        <h3 id="task-title-day" class="text-2xl font-black text-slate-700 italic">مهام اليوم</h3>
+                        <button onclick="addTask()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold text-sm">+ مهمة جديدة</button>
                     </div>
+                    <div id="task-list" class="space-y-4 min-h-[300px]"></div>
                 </div>
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 h-fit">
+                    <h4 class="font-black text-slate-700 mb-4">🏁 نسبة إنجاز اليوم</h4>
+                    <div class="w-full bg-slate-100 h-6 rounded-full overflow-hidden p-1">
+                        <div id="day-progress-bar" class="bg-green-500 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                    <p id="day-progress-text" class="text-center text-xs font-black mt-3 text-slate-400 tracking-tighter">0 / 0 مهام</p>
+                </div>
+            </div>
+        </div>
 
-                <ul class="task-items" id="ul"> </ul>
+        <div id="page-analytics" class="hidden page-content">
+            <h2 class="text-3xl font-black text-slate-800 mb-10 text-right">تقارير الإنجاز اللحظية 📊</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                    <h3 class="font-black text-slate-700 mb-6">مخطط آخر 7 أيام</h3>
+                    <div class="h-80"><canvas id="weekChart"></canvas></div>
+                </div>
+                <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100 text-center flex flex-col items-center justify-center">
+                    <span class="text-slate-400 font-bold uppercase text-xs tracking-widest mb-4">إجمالي مجهودك بالساعات</span>
+                    <h3 id="total-cumulative" class="text-7xl font-black text-blue-600 tracking-tighter">0.000</h3>
+                    <p class="text-slate-500 font-bold mt-4 uppercase">ساعة مذاكرة حقيقية</p>
+                    <div class="mt-6 text-[10px] text-slate-300 italic text-right">العداد يتحدث مع كل ثانية مذاكرة*</div>
+                </div>
             </div>
         </div>
     </main>
 
-    <script src="TODO.js"></script>
-</body>
+    <div id="focus-ui" class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center text-white text-center p-8 bg-black">
+        <h2 class="text-4xl md:text-5xl quran-font mb-10 text-gray-400 animate-pulse">"وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ"</h2>
+        <div id="focus-display" class="text-9xl font-black mb-16 tracking-tighter">00:00:00</div>
+        <button onclick="toggleFocusMode()" class="px-12 py-3 border border-slate-700 text-slate-500 rounded-full hover:text-white transition-all">إنهاء التركيز</button>
+    </div>
 
+    <script>
+        let tasksStore = JSON.parse(localStorage.getItem('tasksStore')) || {};
+        let studyLog = JSON.parse(localStorage.getItem('studyLog')) || {};
+        let currentViewingDay = 1;
+        let activeSeconds = 0;
+        let timerInterval;
+        let myChartInstance = null;
+
+        const motivationList = [
+            { title: "رسالة ربانية", text: "«وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ».. كمل سعيك.", icon: "info" },
+            { title: "تذكير", text: "«إِنَّا لَا نُضِيعُ أَجْرَ مَنْ أَحْسَنَ عَمَلًا».. مجهودك محفوظ.", icon: "success" },
+            { title: "عزيمة أمير", text: "نص ساعة بتركيز.. إنت دلوقتي أقرب لحلمك.", icon: "success" },
+            { title: "استعن بالله", text: "«فَإِذَا عَزَمْتَ فَتَوَكَّلْ عَلَى اللَّهِ».. جدد نيتك.", icon: "info" }
+        ];
+
+        // NAVIGATION
+        function showPage(pageId) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            document.getElementById(`nav-${pageId}`).classList.add('active');
+            if(pageId === 'analytics') renderChart();
+            if(pageId === 'days') renderDay();
+            updateLiveTotal();
+        }
+
+        function changeDay(offset) {
+            let next = currentViewingDay + offset;
+            if(next >= 1 && next <= 135) { currentViewingDay = next; renderDay(); }
+        }
+
+        // TIMER LOGIC
+        function startTimer() {
+            document.getElementById('startBtn').classList.add('hidden');
+            document.getElementById('stopBtn').classList.remove('hidden');
+            timerInterval = setInterval(() => {
+                activeSeconds++;
+                updateTimerDisplay();
+                if(activeSeconds > 0 && activeSeconds % 1800 === 0) showMotivationAlert();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            document.getElementById('startBtn').classList.remove('hidden');
+            document.getElementById('stopBtn').classList.add('hidden');
+            clearInterval(timerInterval);
+            saveToLog();
+        }
+
+        function updateTimerDisplay() {
+            const h = Math.floor(activeSeconds/3600).toString().padStart(2,'0');
+            const m = Math.floor((activeSeconds%3600)/60).toString().padStart(2,'0');
+            const s = (activeSeconds%60).toString().padStart(2,'0');
+            const timeStr = `${h}:${m}:${s}`;
+            document.getElementById('display').innerText = timeStr;
+            document.getElementById('focus-display').innerText = timeStr;
+            updateLiveTotal(); // التحديث اللحظي للرقم
+        }
+
+        function updateLiveTotal() {
+            const savedSecs = Object.values(studyLog).reduce((a, b) => a + b, 0);
+            const totalHours = ((savedSecs + activeSeconds) / 3600).toFixed(3); // 3 أرقام للدقة
+            const totalDisplay = document.getElementById('total-cumulative');
+            if(totalDisplay) totalDisplay.innerText = totalHours;
+        }
+
+        function saveToLog() {
+            if(activeSeconds > 0) {
+                const today = new Date().toISOString().split('T')[0];
+                studyLog[today] = (studyLog[today] || 0) + activeSeconds;
+                localStorage.setItem('studyLog', JSON.stringify(studyLog));
+                activeSeconds = 0;
+                updateTimerDisplay();
+            }
+        }
+
+        function showMotivationAlert() {
+            const msg = motivationList[Math.floor(Math.random()*motivationList.length)];
+            Swal.fire({ title: msg.title, text: msg.text, icon: msg.icon, confirmButtonText: 'كمل 💪', timer: 15000 });
+        }
+
+        function finishSession() {
+            stopTimer();
+            confetti({ particleCount: 200, spread: 100 });
+            Swal.fire('تم الحفظ!', 'إنجاز رائع يا بطل.', 'success');
+        }
+
+        // TASKS
+        function renderDay() {
+            document.getElementById('current-viewing-day-label').innerText = `اليوم ${currentViewingDay}`;
+            document.getElementById('task-title-day').innerText = `مهام اليوم ${currentViewingDay}`;
+            const dayKey = `day${currentViewingDay}`;
+            const tasks = tasksStore[dayKey] || [];
+            const list = document.getElementById('task-list');
+            list.innerHTML = tasks.length === 0 ? `<div class="text-center py-20 text-slate-300 italic">لا مهام مسجلة..</div>` : 
+                tasks.map((t, idx) => `
+                <div class="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100 group">
+                    <div class="flex items-center gap-4">
+                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${idx})" class="w-6 h-6 accent-blue-600 cursor-pointer">
+                        <span class="font-bold ${t.done ? 'task-done' : ''}">${t.text}</span>
+                    </div>
+                    <button onclick="deleteTask(${idx})" class="text-red-400 opacity-0 group-hover:opacity-100 transition">حذف</button>
+                </div>`).join('');
+            updateProgress();
+        }
+
+        function addTask() {
+            Swal.fire({ title: 'مهمة جديدة', input: 'text', confirmButtonText: 'إضافة' }).then(r => {
+                if(r.value) {
+                    const dayKey = `day${currentViewingDay}`;
+                    if(!tasksStore[dayKey]) tasksStore[dayKey] = [];
+                    tasksStore[dayKey].push({ text: r.value, done: false });
+                    localStorage.setItem('tasksStore', JSON.stringify(tasksStore));
+                    renderDay();
+                }
+            });
+        }
+
+        function toggleTask(idx) {
+            const dayKey = `day${currentViewingDay}`;
+            tasksStore[dayKey][idx].done = !tasksStore[dayKey][idx].done;
+            if(tasksStore[dayKey][idx].done) confetti({ particleCount: 40 });
+            localStorage.setItem('tasksStore', JSON.stringify(tasksStore));
+            renderDay();
+        }
+
+        function deleteTask(idx) {
+            const dayKey = `day${currentViewingDay}`;
+            tasksStore[dayKey].splice(idx, 1);
+            localStorage.setItem('tasksStore', JSON.stringify(tasksStore));
+            renderDay();
+        }
+
+        function updateProgress() {
+            const dayKey = `day${currentViewingDay}`;
+            const tasks = tasksStore[dayKey] || [];
+            const done = tasks.filter(t => t.done).length;
+            const total = tasks.length;
+            const percent = total === 0 ? 0 : (done/total)*100;
+            document.getElementById('day-progress-bar').style.width = `${percent}%`;
+            document.getElementById('day-progress-text').innerText = `${done} / ${total} مهام مكتملة`;
+        }
+
+        // ANALYTICS
+        function renderChart() {
+            const ctx = document.getElementById('weekChart').getContext('2d');
+            const dates = [...Array(7)].map((_, i) => {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                return d.toISOString().split('T')[0];
+            }).reverse();
+            
+            // في الشارت هنعرض بيانات اليوم الحالي (المسجلة + النشطة)
+            const todayKey = new Date().toISOString().split('T')[0];
+            const data = dates.map(d => {
+                let hours = (studyLog[d] || 0) / 3600;
+                if(d === todayKey) hours += (activeSeconds / 3600);
+                return hours;
+            });
+
+            if(myChartInstance) myChartInstance.destroy();
+            myChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dates.map(d => d.slice(5)),
+                    datasets: [{
+                        label: 'ساعات المذاكرة',
+                        data: data,
+                        backgroundColor: '#2563eb',
+                        borderRadius: 8
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        function toggleFocusMode() {
+            const isFocus = !document.body.classList.contains('focus-mode');
+            document.body.classList.toggle('focus-mode');
+            document.getElementById('focus-ui').classList.toggle('hidden', !isFocus);
+            document.getElementById('main-content').classList.toggle('hidden', isFocus);
+            document.querySelector('aside').classList.toggle('hidden', isFocus);
+        }
+
+        function init() {
+            const diff = new Date('2026-06-20') - new Date();
+            document.getElementById('countdown-side').innerText = Math.ceil(diff/86400000) + ' يوم';
+            document.getElementById('current-date-label').innerText = new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+            renderDay();
+            updateLiveTotal();
+            // تحديث الشارت كل دقيقة لو الصفحة مفتوحة
+            setInterval(() => { if(!document.getElementById('page-analytics').classList.contains('hidden')) renderChart(); }, 60000);
+        }
+
+        init();
+    </script>
+</body>
 </html>
