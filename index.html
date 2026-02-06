@@ -3,313 +3,348 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student OS Pro | النسخة الدقيقة</title>
+    <title>Mero Ultimate OS | Black Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Amiri:wght@700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; overflow-x: hidden; }
-        .quran-font { font-family: 'Amiri', serif; }
-        .nav-link.active { background-color: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); }
-        .task-done { text-decoration: line-through; opacity: 0.5; color: #94a3b8; }
-        .focus-mode { background: black !important; cursor: none; }
-        .page-content { transition: all 0.4s ease; }
+        :root { 
+            --bg: #000000; 
+            --card: #111111; 
+            --text: #ffffff; 
+            --accent: #2563eb;
+            --border: #222222;
+        }
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            overflow-x: hidden; 
+        }
+        .mero-card { 
+            background: var(--card); 
+            border-radius: 2rem; 
+            border: 1px solid var(--border);
+        }
+        .nav-link.active { 
+            background: var(--accent); 
+            color: white; 
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); 
+        }
+        .nav-link:not(.active) { color: #666; }
+        .nav-link:not(.active):hover { color: #fff; background: #1a1a1a; }
+        
+        .timer-font { font-family: monospace; font-weight: 900; letter-spacing: -2px; }
+        
+        /* Custom Scrollbar for Black Mode */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        
+        /* Input & SweetAlert Styles for Dark */
+        input { background: #1a1a1a !important; color: white !important; border: 1px solid #333 !important; }
+        .swal2-popup { background: #111 !important; color: white !important; border: 1px solid #333 !important; }
     </style>
 </head>
-<body class="transition-all duration-700">
+<body class="p-0 m-0">
 
-    <aside class="fixed right-0 top-0 h-full w-20 md:w-64 bg-white border-l border-slate-200 z-50 flex flex-col p-4 shadow-2xl">
+    <aside class="fixed right-0 top-0 h-full w-20 md:w-64 mero-card z-50 flex flex-col p-4 border-l border-zinc-800 rounded-none">
         <div class="mb-10 text-center">
-            <h1 class="hidden md:block text-2xl font-black text-blue-600 tracking-tighter">STUDENT OS</h1>
-            <span class="md:hidden text-2xl">🎓</span>
+            <h1 class="hidden md:block text-2xl font-black text-blue-500 italic uppercase tracking-tighter">Mero OS</h1>
+            <div id="streak-badge" class="text-orange-500 font-bold text-xs mt-2">🔥 ستريك: 0 يوم</div>
         </div>
         
-        <nav class="space-y-4 flex-1">
-            <button onclick="showPage('home')" id="nav-home" class="nav-link active w-full flex items-center gap-3 p-4 rounded-2xl transition font-bold">
-                <span>🏠</span> <span class="hidden md:block">لوحة التحكم</span>
-            </button>
-            <button onclick="showPage('days')" id="nav-days" class="nav-link w-full flex items-center gap-3 p-4 rounded-2xl transition font-bold">
-                <span>⚔️</span> <span class="hidden md:block">خطة الـ 135 يوم</span>
-            </button>
-            <button onclick="showPage('analytics')" id="nav-analytics" class="nav-link w-full flex items-center gap-3 p-4 rounded-2xl transition font-bold">
-                <span>📈</span> <span class="hidden md:block">تقارير الإنجاز</span>
-            </button>
+        <nav class="space-y-3 flex-1">
+            <button onclick="showPage('home')" id="nav-home" class="nav-link active w-full flex items-center gap-3 p-4 rounded-2xl font-bold transition">🏠 <span class="hidden md:block">الرئيسية</span></button>
+            <button onclick="showPage('days')" id="nav-days" class="nav-link w-full flex items-center gap-3 p-4 rounded-2xl font-bold transition">⚔️ <span class="hidden md:block">الخطة</span></button>
+            <button onclick="showPage('backlog')" id="nav-backlog" class="nav-link w-full flex items-center gap-3 p-4 rounded-2xl font-bold transition">🏺 <span class="hidden md:block">التراكمات</span></button>
+            <button onclick="showPage('stats')" id="nav-stats" class="nav-link w-full flex items-center gap-3 p-4 rounded-2xl font-bold transition">📊 <span class="hidden md:block">الإحصائيات</span></button>
         </nav>
 
-        <div class="mt-auto md:p-4 bg-red-50 rounded-2xl text-center hidden md:block border border-red-100">
-            <p class="text-[10px] text-red-400 font-bold uppercase tracking-widest">باقي على الحلم</p>
-            <p id="countdown-side" class="text-xl font-black text-red-600">-- يوم</p>
+        <div class="space-y-2 mb-4">
+            <button onclick="exportData()" class="w-full p-3 text-[10px] rounded-xl bg-zinc-900 text-zinc-400 font-bold border border-zinc-800 hover:text-white transition">نسخة احتياطية 💾</button>
+        </div>
+
+        <div class="p-4 bg-zinc-900 border border-zinc-800 rounded-2xl text-center">
+            <p id="countdown-side" class="text-xl font-black text-red-500">-- يوم</p>
+            <p class="text-[8px] font-bold opacity-40 uppercase">على الامتحانات</p>
         </div>
     </aside>
 
-    <main id="main-content" class="mr-20 md:mr-64 p-4 md:p-10 min-h-screen">
-
+    <main class="mr-20 md:mr-64 p-4 md:p-10 min-h-screen bg-black">
+        
         <div id="page-home" class="page-content">
             <header class="mb-10 flex justify-between items-center">
                 <div>
-                    <h2 class="text-3xl font-black text-slate-800 italic">عاش يا بطل! 🔥</h2>
-                    <p class="text-slate-500 font-medium" id="current-date-label"></p>
+                    <h2 class="text-3xl font-black italic text-white">عاش يا ميرو! 🚀</h2>
+                    <p id="rank-label" class="text-zinc-500 font-bold text-sm">الرتبة: دحيح مستجد</p>
                 </div>
-                <button onclick="toggleFocusMode()" class="bg-slate-900 text-white px-8 py-3 rounded-2xl font-bold shadow-lg">Focus Mode 🧠</button>
+                <div class="bg-blue-600 text-white p-4 rounded-2xl shadow-2xl text-center min-w-[130px]">
+                    <p class="text-[10px] font-bold uppercase opacity-70 tracking-widest">إنجاز اليوم</p>
+                    <p id="today-time-card" class="text-xl font-black italic">0 س و 0 د</p>
+                </div>
             </header>
 
-            <div class="bg-white p-12 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                <span class="text-blue-500 font-bold mb-4 tracking-widest text-xs uppercase bg-blue-50 px-4 py-1 rounded-full">جلسة تركيز عميق</span>
-                <div id="display" class="text-8xl md:text-9xl font-black text-slate-900 mb-12 tracking-tighter">00:00:00</div>
-                <div class="flex gap-4 relative z-10">
-                    <button id="startBtn" onclick="startTimer()" class="bg-blue-600 text-white px-12 py-4 rounded-2xl font-bold hover:bg-blue-700 shadow-2xl shadow-blue-200 transition">ابدأ الآن</button>
-                    <button id="stopBtn" onclick="stopTimer()" class="hidden bg-amber-500 text-white px-12 py-4 rounded-2xl font-bold">وقف مؤقت</button>
-                    <button onclick="finishSession()" class="bg-slate-100 text-slate-600 px-10 py-4 rounded-2xl font-bold hover:bg-green-600 hover:text-white transition">تم الإنجاز ✅</button>
+            <div class="mero-card p-10 text-center relative overflow-hidden border-zinc-800">
+                <div class="flex gap-4 justify-center mb-6">
+                    <button id="pomoBtn" onclick="togglePomoMode()" class="bg-zinc-900 border border-zinc-700 text-orange-500 px-6 py-2 rounded-full font-bold text-xs hover:bg-zinc-800 transition">وضع الـ 50 دقيقة ⏱️</button>
+                    <span id="pomo-count-display" class="bg-zinc-900 text-zinc-400 px-4 py-2 rounded-full text-xs font-bold border border-zinc-800">جلسات اليوم: 0/10</span>
                 </div>
+                
+                <div id="timer-display" class="timer-font text-8xl md:text-[10rem] mb-12 tabular-nums text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">00:00:00</div>
+                
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <button id="startBtn" onclick="startMeroTimer()" class="bg-blue-600 text-white px-12 py-5 rounded-3xl font-black text-xl shadow-xl hover:scale-105 transition">ابدأ الجلسة 🚀</button>
+                    <button id="stopBtn" onclick="resetAndStop()" class="hidden bg-red-600 text-white px-12 py-5 rounded-3xl font-black text-xl shadow-xl hover:scale-105 transition">وقف وتصفير ⏹️</button>
+                    <button onclick="finishMeroSession()" class="bg-zinc-800 text-white border border-zinc-700 px-10 py-5 rounded-3xl font-black hover:bg-green-600 transition">تم الإنجاز ✅</button>
+                </div>
+                <p class="mt-8 text-zinc-600 text-xs italic">لا يتوقف النجاح أبداً، استمر يا بطل.</p>
             </div>
         </div>
 
         <div id="page-days" class="hidden page-content">
-            <header class="flex justify-between items-center mb-10">
-                <h2 class="text-3xl font-black text-slate-800">خارطة الـ 135 يوم ⚔️</h2>
-                <div class="flex items-center gap-4 bg-white p-3 rounded-3xl shadow-sm border border-slate-100">
-                    <button onclick="changeDay(-1)" class="p-3 hover:bg-slate-50 rounded-2xl">◀️</button>
-                    <span id="current-viewing-day-label" class="font-black text-blue-600 text-xl min-w-[80px] text-center">اليوم 1</span>
-                    <button onclick="changeDay(1)" class="p-3 hover:bg-slate-50 rounded-2xl">▶️</button>
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-black italic text-white">خطة اليوم <span id="current-day-label" class="text-blue-500">1</span></h2>
+                <div class="flex gap-4">
+                    <button onclick="changeDay(-1)" class="p-4 mero-card border-zinc-800 hover:bg-zinc-900">◀️</button>
+                    <button onclick="changeDay(1)" class="p-4 mero-card border-zinc-800 hover:bg-zinc-900">▶️</button>
                 </div>
-            </header>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                    <div class="flex justify-between items-center mb-8">
-                        <h3 id="task-title-day" class="text-2xl font-black text-slate-700 italic">مهام اليوم</h3>
-                        <button onclick="addTask()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold text-sm">+ مهمة جديدة</button>
-                    </div>
-                    <div id="task-list" class="space-y-4 min-h-[300px]"></div>
+            </div>
+            <div id="task-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div>
+            <button onclick="addTask()" class="w-full p-6 border-2 border-dashed border-zinc-800 rounded-3xl text-zinc-600 font-black text-xl hover:border-blue-500 hover:text-blue-500 transition">+ ضيف مهمة جديدة للجدول</button>
+        </div>
+
+        <div id="page-backlog" class="hidden page-content">
+            <h2 class="text-3xl font-black mb-8 italic text-white">حصالة التراكمات 🏺</h2>
+            <div class="mero-card p-8 border-zinc-800">
+                <div class="flex gap-4 mb-8">
+                    <input id="backlog-input" type="text" placeholder="ايه الدرس اللي فاتك؟" class="flex-1 p-5 rounded-2xl outline-none focus:ring-2 ring-blue-600 transition">
+                    <button onclick="addToBacklog()" class="bg-blue-600 text-white px-10 rounded-2xl font-bold">إضافة</button>
                 </div>
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 h-fit">
-                    <h4 class="font-black text-slate-700 mb-4">🏁 نسبة إنجاز اليوم</h4>
-                    <div class="w-full bg-slate-100 h-6 rounded-full overflow-hidden p-1">
-                        <div id="day-progress-bar" class="bg-green-500 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
-                    </div>
-                    <p id="day-progress-text" class="text-center text-xs font-black mt-3 text-slate-400 tracking-tighter">0 / 0 مهام</p>
-                </div>
+                <div id="backlog-list" class="space-y-3"></div>
             </div>
         </div>
 
-        <div id="page-analytics" class="hidden page-content">
-            <h2 class="text-3xl font-black text-slate-800 mb-10 text-right">تقارير الإنجاز اللحظية 📊</h2>
+        <div id="page-stats" class="hidden page-content">
+            <h2 class="text-3xl font-black mb-8 italic text-white">تحليل الأداء 📊</h2>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                    <h3 class="font-black text-slate-700 mb-6">مخطط آخر 7 أيام</h3>
-                    <div class="h-80"><canvas id="weekChart"></canvas></div>
-                </div>
-                <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100 text-center flex flex-col items-center justify-center">
-                    <span class="text-slate-400 font-bold uppercase text-xs tracking-widest mb-4">إجمالي مجهودك بالساعات</span>
-                    <h3 id="total-cumulative" class="text-7xl font-black text-blue-600 tracking-tighter">0.000</h3>
-                    <p class="text-slate-500 font-bold mt-4 uppercase">ساعة مذاكرة حقيقية</p>
-                    <div class="mt-6 text-[10px] text-slate-300 italic text-right">العداد يتحدث مع كل ثانية مذاكرة*</div>
-                </div>
+                <div class="mero-card p-8 lg:col-span-2 min-h-[400px] border-zinc-800"><canvas id="meroChart"></canvas></div>
+                <div id="stats-table" class="space-y-3 max-h-[500px] overflow-y-auto"></div>
             </div>
         </div>
     </main>
 
-    <div id="focus-ui" class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center text-white text-center p-8 bg-black">
-        <h2 class="text-4xl md:text-5xl quran-font mb-10 text-gray-400 animate-pulse">"وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ"</h2>
-        <div id="focus-display" class="text-9xl font-black mb-16 tracking-tighter">00:00:00</div>
-        <button onclick="toggleFocusMode()" class="px-12 py-3 border border-slate-700 text-slate-500 rounded-full hover:text-white transition-all">إنهاء التركيز</button>
-    </div>
-
     <script>
-        let tasksStore = JSON.parse(localStorage.getItem('tasksStore')) || {};
-        let studyLog = JSON.parse(localStorage.getItem('studyLog')) || {};
-        let currentViewingDay = 1;
+        // --- Core States ---
+        let studyLog = JSON.parse(localStorage.getItem('meroStudyLog')) || {};
+        let tasksStore = JSON.parse(localStorage.getItem('meroTasksStore')) || {};
+        let backlog = JSON.parse(localStorage.getItem('meroBacklog')) || [];
+        let pomoSessions = JSON.parse(localStorage.getItem('meroPomoSessions')) || {};
+        let startTime = localStorage.getItem('meroStartTime') || null;
+        let isPomo = localStorage.getItem('isPomo') === 'true';
+
         let activeSeconds = 0;
         let timerInterval;
-        let myChartInstance = null;
+        let currentDay = 1;
+        let chartInstance = null;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        const motivationList = [
-            { title: "رسالة ربانية", text: "«وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ».. كمل سعيك.", icon: "info" },
-            { title: "تذكير", text: "«إِنَّا لَا نُضِيعُ أَجْرَ مَنْ أَحْسَنَ عَمَلًا».. مجهودك محفوظ.", icon: "success" },
-            { title: "عزيمة أمير", text: "نص ساعة بتركيز.. إنت دلوقتي أقرب لحلمك.", icon: "success" },
-            { title: "استعن بالله", text: "«فَإِذَا عَزَمْتَ فَتَوَكَّلْ عَلَى اللَّهِ».. جدد نيتك.", icon: "info" }
-        ];
-
-        // NAVIGATION
-        function showPage(pageId) {
-            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
-            document.getElementById(`page-${pageId}`).classList.remove('hidden');
-            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-            document.getElementById(`nav-${pageId}`).classList.add('active');
-            if(pageId === 'analytics') renderChart();
-            if(pageId === 'days') renderDay();
-            updateLiveTotal();
+        // --- Navigation ---
+        function showPage(p) {
+            document.querySelectorAll('.page-content').forEach(pg => pg.classList.add('hidden'));
+            document.getElementById(`page-${p}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(`nav-${p}`).classList.add('active');
+            if(p === 'stats') renderStats();
+            if(p === 'days') renderTasks();
+            if(p === 'backlog') renderBacklog();
         }
 
-        function changeDay(offset) {
-            let next = currentViewingDay + offset;
-            if(next >= 1 && next <= 135) { currentViewingDay = next; renderDay(); }
+        // --- Timer Logic ---
+        function togglePomoMode() {
+            if(startTime) return;
+            isPomo = !isPomo;
+            localStorage.setItem('isPomo', isPomo);
+            activeSeconds = isPomo ? 50 * 60 : 0;
+            updateTimerDisplay();
         }
 
-        // TIMER LOGIC
-        function startTimer() {
+        function startMeroTimer() {
+            if (!startTime) {
+                startTime = isPomo ? Date.now() + (50 * 60 * 1000) : Date.now();
+                localStorage.setItem('meroStartTime', startTime);
+            }
             document.getElementById('startBtn').classList.add('hidden');
             document.getElementById('stopBtn').classList.remove('hidden');
+            runTimer();
+        }
+
+        function runTimer() {
+            clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                activeSeconds++;
+                const now = Date.now();
+                if(isPomo) {
+                    let diff = Math.ceil((startTime - now) / 1000);
+                    if(diff <= 0) { playAlarm(); handlePomoFinish(); } else { activeSeconds = diff; }
+                } else {
+                    activeSeconds = Math.floor((now - startTime) / 1000);
+                }
                 updateTimerDisplay();
-                if(activeSeconds > 0 && activeSeconds % 1800 === 0) showMotivationAlert();
             }, 1000);
         }
 
-        function stopTimer() {
+        function forceReset() {
+            clearInterval(timerInterval);
+            startTime = null;
+            localStorage.removeItem('meroStartTime');
+            activeSeconds = isPomo ? 50 * 60 : 0;
             document.getElementById('startBtn').classList.remove('hidden');
             document.getElementById('stopBtn').classList.add('hidden');
-            clearInterval(timerInterval);
-            saveToLog();
+            updateTimerDisplay();
+        }
+
+        function resetAndStop() { forceReset(); }
+
+        function handlePomoFinish() {
+            const today = new Date().toLocaleDateString('en-CA');
+            const dayKey = `day${currentDay}`;
+            pomoSessions[dayKey] = (pomoSessions[dayKey] || 0) + 1;
+            studyLog[today] = (studyLog[today] || 0) + (50 * 60);
+            saveAll();
+            confetti({ particleCount: 150, spread: 60, colors: ['#2563eb', '#ffffff'] });
+            forceReset();
+            updateDashboard();
+        }
+
+        function finishMeroSession() {
+            if(isPomo || !startTime) return;
+            const today = new Date().toLocaleDateString('en-CA');
+            studyLog[today] = (studyLog[today] || 0) + activeSeconds;
+            saveAll();
+            forceReset();
+            updateDashboard();
         }
 
         function updateTimerDisplay() {
-            const h = Math.floor(activeSeconds/3600).toString().padStart(2,'0');
-            const m = Math.floor((activeSeconds%3600)/60).toString().padStart(2,'0');
-            const s = (activeSeconds%60).toString().padStart(2,'0');
-            const timeStr = `${h}:${m}:${s}`;
-            document.getElementById('display').innerText = timeStr;
-            document.getElementById('focus-display').innerText = timeStr;
-            updateLiveTotal(); // التحديث اللحظي للرقم
+            const h = Math.floor(activeSeconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((activeSeconds % 3600) / 60).toString().padStart(2, '0');
+            const s = (activeSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${h}:${m}:${s}`;
         }
 
-        function updateLiveTotal() {
-            const savedSecs = Object.values(studyLog).reduce((a, b) => a + b, 0);
-            const totalHours = ((savedSecs + activeSeconds) / 3600).toFixed(3); // 3 أرقام للدقة
-            const totalDisplay = document.getElementById('total-cumulative');
-            if(totalDisplay) totalDisplay.innerText = totalHours;
-        }
-
-        function saveToLog() {
-            if(activeSeconds > 0) {
-                const today = new Date().toISOString().split('T')[0];
-                studyLog[today] = (studyLog[today] || 0) + activeSeconds;
-                localStorage.setItem('studyLog', JSON.stringify(studyLog));
-                activeSeconds = 0;
-                updateTimerDisplay();
-            }
-        }
-
-        function showMotivationAlert() {
-            const msg = motivationList[Math.floor(Math.random()*motivationList.length)];
-            Swal.fire({ title: msg.title, text: msg.text, icon: msg.icon, confirmButtonText: 'كمل 💪', timer: 15000 });
-        }
-
-        function finishSession() {
-            stopTimer();
-            confetti({ particleCount: 200, spread: 100 });
-            Swal.fire('تم الحفظ!', 'إنجاز رائع يا بطل.', 'success');
-        }
-
-        // TASKS
-        function renderDay() {
-            document.getElementById('current-viewing-day-label').innerText = `اليوم ${currentViewingDay}`;
-            document.getElementById('task-title-day').innerText = `مهام اليوم ${currentViewingDay}`;
-            const dayKey = `day${currentViewingDay}`;
-            const tasks = tasksStore[dayKey] || [];
-            const list = document.getElementById('task-list');
-            list.innerHTML = tasks.length === 0 ? `<div class="text-center py-20 text-slate-300 italic">لا مهام مسجلة..</div>` : 
-                tasks.map((t, idx) => `
-                <div class="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100 group">
+        // --- Task Management ---
+        function renderTasks() {
+            document.getElementById('current-day-label').innerText = currentDay;
+            const tasks = tasksStore[`day${currentDay}`] || [];
+            document.getElementById('task-list').innerHTML = tasks.map((t, i) => `
+                <div class="mero-card p-6 flex justify-between items-center bg-zinc-900 border-zinc-800">
                     <div class="flex items-center gap-4">
-                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${idx})" class="w-6 h-6 accent-blue-600 cursor-pointer">
-                        <span class="font-bold ${t.done ? 'task-done' : ''}">${t.text}</span>
+                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${i})" class="w-6 h-6 rounded-full">
+                        <span class="${t.done ? 'line-through text-zinc-600' : 'text-white'} font-bold">${t.text}</span>
                     </div>
-                    <button onclick="deleteTask(${idx})" class="text-red-400 opacity-0 group-hover:opacity-100 transition">حذف</button>
+                    <button onclick="deleteTask(${i})" class="text-zinc-700 hover:text-red-500">✕</button>
                 </div>`).join('');
-            updateProgress();
         }
 
         function addTask() {
-            Swal.fire({ title: 'مهمة جديدة', input: 'text', confirmButtonText: 'إضافة' }).then(r => {
-                if(r.value) {
-                    const dayKey = `day${currentViewingDay}`;
-                    if(!tasksStore[dayKey]) tasksStore[dayKey] = [];
-                    tasksStore[dayKey].push({ text: r.value, done: false });
-                    localStorage.setItem('tasksStore', JSON.stringify(tasksStore));
-                    renderDay();
+            Swal.fire({ title: 'إضافة مهمة', input: 'text', background: '#111', color: '#fff' }).then(res => {
+                if(res.value) {
+                    const key = `day${currentDay}`;
+                    if(!tasksStore[key]) tasksStore[key] = [];
+                    tasksStore[key].push({ text: res.value, done: false });
+                    saveAll(); renderTasks();
                 }
             });
         }
 
-        function toggleTask(idx) {
-            const dayKey = `day${currentViewingDay}`;
-            tasksStore[dayKey][idx].done = !tasksStore[dayKey][idx].done;
-            if(tasksStore[dayKey][idx].done) confetti({ particleCount: 40 });
-            localStorage.setItem('tasksStore', JSON.stringify(tasksStore));
-            renderDay();
+        function toggleTask(i) {
+            tasksStore[`day${currentDay}`][i].done = !tasksStore[`day${currentDay}`][i].done;
+            saveAll(); renderTasks();
+            if(tasksStore[`day${currentDay}`][i].done) confetti({ particleCount: 20 });
         }
 
-        function deleteTask(idx) {
-            const dayKey = `day${currentViewingDay}`;
-            tasksStore[dayKey].splice(idx, 1);
-            localStorage.setItem('tasksStore', JSON.stringify(tasksStore));
-            renderDay();
+        function deleteTask(i) {
+            tasksStore[`day${currentDay}`].splice(i, 1);
+            saveAll(); renderTasks();
         }
 
-        function updateProgress() {
-            const dayKey = `day${currentViewingDay}`;
-            const tasks = tasksStore[dayKey] || [];
-            const done = tasks.filter(t => t.done).length;
-            const total = tasks.length;
-            const percent = total === 0 ? 0 : (done/total)*100;
-            document.getElementById('day-progress-bar').style.width = `${percent}%`;
-            document.getElementById('day-progress-text').innerText = `${done} / ${total} مهام مكتملة`;
+        // --- Backlog ---
+        function addToBacklog() {
+            const el = document.getElementById('backlog-input');
+            if(el.value) { backlog.push(el.value); saveAll(); renderBacklog(); el.value = ""; }
         }
 
-        // ANALYTICS
-        function renderChart() {
-            const ctx = document.getElementById('weekChart').getContext('2d');
-            const dates = [...Array(7)].map((_, i) => {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                return d.toISOString().split('T')[0];
-            }).reverse();
-            
-            // في الشارت هنعرض بيانات اليوم الحالي (المسجلة + النشطة)
-            const todayKey = new Date().toISOString().split('T')[0];
-            const data = dates.map(d => {
-                let hours = (studyLog[d] || 0) / 3600;
-                if(d === todayKey) hours += (activeSeconds / 3600);
-                return hours;
-            });
+        function renderBacklog() {
+            document.getElementById('backlog-list').innerHTML = backlog.map((b, i) => `
+                <div class="p-5 bg-zinc-900 border border-zinc-800 rounded-2xl flex justify-between items-center">
+                    <span class="text-zinc-300 font-bold">${b}</span>
+                    <button onclick="backlog.splice(${i},1);saveAll();renderBacklog();" class="text-blue-500 font-bold text-sm">تم الإنجاز ✅</button>
+                </div>`).join('');
+        }
 
-            if(myChartInstance) myChartInstance.destroy();
-            myChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: dates.map(d => d.slice(5)),
-                    datasets: [{
-                        label: 'ساعات المذاكرة',
-                        data: data,
-                        backgroundColor: '#2563eb',
-                        borderRadius: 8
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        // --- Stats & Dashboard ---
+        function updateDashboard() {
+            const today = new Date().toLocaleDateString('en-CA');
+            const totalSecs = studyLog[today] || 0;
+            document.getElementById('today-time-card').innerText = `${Math.floor(totalSecs/3600)} س و ${Math.floor((totalSecs%3600)/60)} د`;
+            updateStreak();
+        }
+
+        function updateStreak() {
+            let streak = 0; let d = new Date();
+            while(studyLog[d.toLocaleDateString('en-CA')] > 0) { streak++; d.setDate(d.getDate() - 1); }
+            document.getElementById('streak-badge').innerText = `🔥 ستريك: ${streak} يوم`;
+        }
+
+        function renderStats() {
+            const ctx = document.getElementById('meroChart').getContext('2d');
+            const dates = [...Array(7)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return d.toLocaleDateString('en-CA'); }).reverse();
+            const data = dates.map(d => (studyLog[d] || 0) / 3600);
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels: dates, datasets: [{ data: data, borderColor: '#2563eb', tension: 0.4, fill: true, backgroundColor: 'rgba(37,99,235,0.05)' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#222' } }, x: { grid: { color: '#222' } } } }
             });
         }
 
-        function toggleFocusMode() {
-            const isFocus = !document.body.classList.contains('focus-mode');
-            document.body.classList.toggle('focus-mode');
-            document.getElementById('focus-ui').classList.toggle('hidden', !isFocus);
-            document.getElementById('main-content').classList.toggle('hidden', isFocus);
-            document.querySelector('aside').classList.toggle('hidden', isFocus);
+        function saveAll() {
+            localStorage.setItem('meroStudyLog', JSON.stringify(studyLog));
+            localStorage.setItem('meroTasksStore', JSON.stringify(tasksStore));
+            localStorage.setItem('meroBacklog', JSON.stringify(backlog));
+            localStorage.setItem('meroPomoSessions', JSON.stringify(pomoSessions));
         }
 
+        function exportData() {
+            const blob = new Blob([JSON.stringify(localStorage)], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `MeroOS_Backup.json`; a.click();
+        }
+
+        function playAlarm() {
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+            osc.start(); osc.stop(audioCtx.currentTime + 1);
+        }
+
+        function changeDay(offset) {
+            currentDay = Math.max(1, Math.min(135, currentDay + offset));
+            renderTasks();
+        }
+
+        // --- Init ---
         function init() {
-            const diff = new Date('2026-06-20') - new Date();
-            document.getElementById('countdown-side').innerText = Math.ceil(diff/86400000) + ' يوم';
-            document.getElementById('current-date-label').innerText = new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
-            renderDay();
-            updateLiveTotal();
-            // تحديث الشارت كل دقيقة لو الصفحة مفتوحة
-            setInterval(() => { if(!document.getElementById('page-analytics').classList.contains('hidden')) renderChart(); }, 60000);
+            const examDate = new Date('2026-06-20');
+            const remain = Math.ceil((examDate - new Date()) / 86400000);
+            document.getElementById('countdown-side').innerText = Math.max(0, remain) + ' يوم';
+            if(startTime) runTimer();
+            updateDashboard();
+            renderTasks();
+            renderBacklog();
         }
-
         init();
     </script>
 </body>
